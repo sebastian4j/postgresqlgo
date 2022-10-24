@@ -3,6 +3,8 @@ package postgresqlgo
 import (
 	"context"
 	"fmt"
+	"io"
+	"io/fs"
 	"log"
 	"os"
 	"strconv"
@@ -14,6 +16,7 @@ import (
 var poolx *pgxpool.Pool
 
 type Postgresqlgo struct {
+	Files fs.FS
 }
 
 // Conn obtiene una conexión a postgres desde el pool
@@ -58,4 +61,16 @@ func (p *Postgresqlgo) ConnWithErr() (*pgxpool.Conn, error) {
 		return nil, err
 	}
 	return conn, nil
+}
+
+// ReadQuery lee el contenido de una query para poder utilizarla posteriormente
+func (p *Postgresqlgo) ReadQuery(sql string) string {
+	file, err := p.Files.Open(sql)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	bytes, _ := io.ReadAll(file)
+	query := string(bytes)
+	return query
 }

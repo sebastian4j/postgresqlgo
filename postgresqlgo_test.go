@@ -2,6 +2,7 @@ package postgresqlgo
 
 import (
 	"context"
+	"io/fs"
 	"log"
 	"os"
 	"testing"
@@ -66,4 +67,19 @@ func TestConnections(t *testing.T) {
 			con.Release()
 		}
 	})
+}
+
+type TestFS struct {
+}
+
+func (tfs TestFS) Open(name string) (fs.File, error) {
+	f, err := os.OpenFile(name, os.O_RDONLY, 0644)
+	return f, err
+}
+
+func TestReadQuery(t *testing.T) {
+	tfs := TestFS{}
+	p := Postgresqlgo{Files: tfs}
+	lee := p.ReadQuery("./testdata/a.sql")
+	assert.Equal(t, "b", lee)
 }
