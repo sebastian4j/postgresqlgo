@@ -43,6 +43,7 @@ func TestConnections(t *testing.T) {
 
 	t.Run("puedo hacer una query", func(t *testing.T) {
 		p := Postgresqlgo{}
+		os.Setenv("PAUSE_ACQUIRE_SECONDS", "0")
 		con := p.Conn()
 		r, err := con.Query(context.Background(), "select extract(epoch from now())::int")
 		if err != nil {

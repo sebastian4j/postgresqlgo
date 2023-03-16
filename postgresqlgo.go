@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -54,6 +55,14 @@ func (p *Postgresqlgo) ConnWithErr() (*pgxpool.Conn, error) {
 		}
 		poolx = pl
 		log.Println("pool creado")
+	}
+	pause := os.Getenv("PAUSE_ACQUIRE_SECONDS")
+	if pause != "" {
+		p, err := strconv.Atoi(pause)
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(time.Duration(p) * time.Second)
 	}
 	conn, err := poolx.Acquire(context.Background())
 	if err != nil {
